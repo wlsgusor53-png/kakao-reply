@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>카카오톡 답장 생성기</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&family=Black+Han+Sans&display=swap" rel="stylesheet">
+<style>
+:root {
+  --yellow: #FEE500;
+  --yellow-dark: #E6CF00;
+  --brown: #3C1E1E;
+  --bg: #F7F3E9;
+  --surface: #FFFFFF;
+  --surface2: #F5F0E8;
+  --border: rgba(0,0,0,0.08);
+  --text: #1A1A1A;
+  --text2: #6B6B6B;
+  --text3: #9A9A9A;
+  --green: #3CB371;
+  --red: #E24B4A;
+  --radius: 18px;
+  --radius-sm: 12px;
+  --shadow: 0 2px 12px rgba(0,0,0,0.08);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+body { font-family: 'Noto Sans KR', sans-serif; background: var(--bg); min-height: 100dvh; display: flex; justify-content: center; }
+.app { width: 100%; max-width: 480px; padding: 0 0 60px; }
+.header { background: var(--yellow); padding: 52px 24px 30px; text-align: center; position: relative; overflow: hidden; }
+.header::before { content: '💬'; position: absolute; font-size: 130px; opacity: .07; right: -20px; top: -10px; line-height: 1; pointer-events: none; }
+.header-tag { display: inline-block; background: rgba(0,0,0,0.1); color: var(--brown); font-size: 11px; font-weight: 700; letter-spacing: .1em; padding: 4px 12px; border-radius: 100px; margin-bottom: 10px; }
+.header h1 { font-family: 'Black Han Sans', sans-serif; font-size: 30px; color: var(--brown); line-height: 1.2; }
+.header p { font-size: 13px; color: rgba(60,30,30,0.6); margin-top: 7px; line-height: 1.6; }
+.card { margin: 14px 16px 0; background: var(--surface); border-radius: var(--radius); padding: 18px; box-shadow: var(--shadow); }
+.lbl { font-size: 12px; font-weight: 700; color: var(--text2); letter-spacing: .05em; text-transform: uppercase; margin-bottom: 10px; }
+textarea { width: 100%; background: var(--surface2); border: 1.5px solid transparent; border-radius: var(--radius-sm); color: var(--text); font-family: 'Noto Sans KR', sans-serif; font-size: 14px; line-height: 1.75; padding: 13px 14px; resize: none; min-height: 120px; outline: none; transition: border-color .2s; }
+textarea::placeholder { color: var(--text3); }
+textarea:focus { border-color: var(--yellow-dark); }
+textarea.shake { animation: shake .4s ease; border-color: var(--red) !important; }
+@keyframes shake { 0%,100%{transform:translateX(0)} 20%{transform:translateX(-6px)} 40%{transform:translateX(6px)} 60%{transform:translateX(-4px)} 80%{transform:translateX(4px)} }
+.char-count { text-align: right; font-size: 11px; color: var(--text3); margin-top: 6px; }
+.tone-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+.tone-btn { background: var(--surface2); border: 1.5px solid transparent; border-radius: var(--radius-sm); color: var(--text2); font-family: 'Noto Sans KR', sans-serif; font-size: 13px; font-weight: 500; padding: 12px 6px; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 5px; transition: all .15s; }
+.tone-btn .icon { font-size: 20px; }
+.tone-btn:active { transform: scale(.95); }
+.tone-btn.active { background: var(--yellow); border-color: var(--yellow-dark); color: var(--brown); font-weight: 700; box-shadow: 0 2px 8px rgba(254,229,0,.4); }
+.gen-wrap { margin: 14px 16px 0; }
+.gen-btn { width: 100%; background: var(--yellow); color: var(--brown); border: none; border-radius: var(--radius); font-family: 'Black Han Sans', sans-serif; font-size: 18px; padding: 17px; cursor: pointer; transition: all .15s; box-shadow: 0 4px 16px rgba(254,229,0,.5); display: flex; align-items: center; justify-content: center; gap: 8px; }
+.gen-btn:active { transform: scale(.98); }
+.gen-btn:disabled { opacity: .5; cursor: not-allowed; transform: none; }
+.loading { display: none; flex-direction: column; align-items: center; padding: 36px 0 24px; gap: 16px; }
+.loading.show { display: flex; }
+.dots { display: flex; gap: 8px; }
+.dot { width: 10px; height: 10px; background: var(--yellow-dark); border-radius: 50%; animation: bounce 1.2s ease-in-out infinite; }
+.dot:nth-child(2) { animation-delay: .2s; }
+.dot:nth-child(3) { animation-delay: .4s; }
+@keyframes bounce { 0%,80%,100% { transform: scale(.5); opacity: .3; } 40% { transform: scale(1); opacity: 1; } }
+.loading-txt { font-size: 14px; color: var(--text2); font-weight: 500; }
+.results-wrap { display: none; flex-direction: column; gap: 12px; margin: 14px 16px 0; animation: fadeUp .4s ease; }
+.results-wrap.show { display: flex; }
+@keyframes fadeUp { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
+.results-header { display: flex; align-items: center; justify-content: space-between; }
+.results-title { font-size: 13px; font-weight: 700; color: var(--text2); }
+.results-badge { font-size: 11px; color: var(--text3); background: var(--surface); padding: 3px 10px; border-radius: 100px; box-shadow: var(--shadow); }
+.reply-card { background: var(--surface); border-radius: var(--radius); padding: 18px 18px 14px; box-shadow: var(--shadow); border-left: 4px solid var(--yellow); animation: slideIn .3s ease both; }
+.reply-card:nth-child(3) { animation-delay: .07s; }
+.reply-card:nth-child(4) { animation-delay: .14s; }
+@keyframes slideIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+.reply-num { font-size: 11px; font-weight: 700; color: var(--text3); letter-spacing: .08em; margin-bottom: 8px; }
+.reply-text { font-size: 15px; color: var(--text); line-height: 1.8; white-space: pre-wrap; word-break: keep-all; }
+.reply-footer { display: flex; justify-content: flex-end; margin-top: 12px; }
+.copy-btn { display: flex; align-items: center; gap: 5px; background: var(--surface2); border: 1px solid var(--border); border-radius: 100px; color: var(--text2); font-family: 'Noto Sans KR', sans-serif; font-size: 12px; font-weight: 700; padding: 6px 14px; cursor: pointer; transition: all .15s; }
+.copy-btn:active { transform: scale(.94); }
+.copy-btn.copied { background: #E8F8EF; border-color: #A8DFC0; color: var(--green); }
+.error-box { margin: 14px 16px 0; background: #FFF0F0; border: 1.5px solid #FFCDD2; border-radius: var(--radius-sm); padding: 14px 16px; font-size: 13px; color: var(--red); line-height: 1.6; display: none; }
+.error-box.show { display: block; }
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <div class="header-tag">AI POWERED</div>
+    <h1>카카오톡<br>답장 생성기</h1>
+    <p>상황을 입력하면 AI가 맞춤 답장을<br>3개 만들어드려요 ✨</p>
+  </div>
+  <div class="card">
+    <div class="lbl">📝 상황 설명</div>
+    <textarea id="situation" maxlength="600" placeholder="구체적으로 적을수록 더 좋은 답장이 나와요!
+
+예시)
+- 친구가 갑자기 돈 빌려달라고 했는데 거절하고 싶어
+- 상사가 주말 회식 오라는데 정중하게 거절하고 싶어
+- 오랫동안 연락 못한 친구한테 먼저 연락하고 싶어"></textarea>
+    <div class="char-count"><span id="charCount">0</span>/600</div>
+  </div>
+  <div class="card">
+    <div class="lbl">🎭 답장 톤</div>
+    <div class="tone-grid">
+      <button class="tone-btn" data-tone="polite" onclick="selectTone(this)"><span class="icon">🙏</span>정중하게</button>
+      <button class="tone-btn active" data-tone="friendly" onclick="selectTone(this)"><span class="icon">😊</span>친근하게</button>
+      <button class="tone-btn" data-tone="witty" onclick="selectTone(this)"><span class="icon">😎</span>센스있게</button>
+    </div>
+  </div>
+  <div class="gen-wrap">
+    <button class="gen-btn" id="genBtn" onclick="generate()">✨ 답장 생성하기</button>
+  </div>
+  <div class="error-box" id="errorBox"></div>
+  <div class="loading" id="loading">
+    <div class="dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+    <div class="loading-txt" id="loadingTxt">상황을 분석하는 중...</div>
+  </div>
+  <div class="results-wrap" id="results"></div>
+</div>
+<script>
+let selectedTone = 'friendly';
+let storedReplies = [];
+let loadingTimer = null;
+let loadingMsgIdx = 0;
+const loadingMsgs = ['상황을 분석하는 중...','관계와 맥락을 파악하는 중...','딱 맞는 표현을 고르는 중...','마지막으로 다듬는 중... ✨'];
+
+document.getElementById('situation').addEventListener('input', function() {
+  document.getElementById('charCount').textContent = this.value.length;
+});
+
+function selectTone(btn) {
+  document.querySelectorAll('.tone-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  selectedTone = btn.dataset.tone;
+}
+
+function setLoading(on) {
+  const el = document.getElementById('loading');
+  const btn = document.getElementById('genBtn');
+  if (on) {
+    el.classList.add('show'); btn.disabled = true;
+    loadingMsgIdx = 0;
+    document.getElementById('loadingTxt').textContent = loadingMsgs[0];
+    loadingTimer = setInterval(() => {
+      loadingMsgIdx = (loadingMsgIdx + 1) % loadingMsgs.length;
+      document.getElementById('loadingTxt').textContent = loadingMsgs[loadingMsgIdx];
+    }, 1400);
+  } else {
+    el.classList.remove('show'); btn.disabled = false; clearInterval(loadingTimer);
+  }
+}
+
+function showError(msg) {
+  const el = document.getElementById('errorBox');
+  el.innerHTML = msg; el.classList.add('show');
+  setTimeout(() => el.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 50);
+}
+function hideError() { document.getElementById('errorBox').classList.remove('show'); }
+function esc(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function renderResults(replies) {
+  storedReplies = replies;
+  const toneLabel = { polite: '정중하게', friendly: '친근하게', witty: '센스있게' }[selectedTone];
+  const wrap = document.getElementById('results');
+  wrap.innerHTML = `
+    <div class="results-header">
+      <div class="results-title">생성된 답장 · ${toneLabel}</div>
+      <div class="results-badge">총 3개</div>
+    </div>
+    ${replies.map((text, i) => `
+      <div class="reply-card">
+        <div class="reply-num">REPLY ${i + 1}</div>
+        <div class="reply-text">${esc(text)}</div>
+        <div class="reply-footer">
+          <button class="copy-btn" onclick="copyReply(this, ${i})">📋 복사하기</button>
+        </div>
+      </div>
+    `).join('')}
+  `;
+  wrap.classList.add('show');
+  setTimeout(() => wrap.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
+}
+
+async function copyReply(btn, idx) {
+  const text = storedReplies[idx] ?? '';
+  try { await navigator.clipboard.writeText(text); }
+  catch {
+    const ta = document.createElement('textarea');
+    ta.value = text; ta.style.cssText = 'position:fixed;top:0;left:0;opacity:0;';
+    document.body.appendChild(ta); ta.focus(); ta.select();
+    document.execCommand('copy'); document.body.removeChild(ta);
+  }
+  btn.classList.add('copied'); btn.textContent = '✅ 복사됐어요!';
+  setTimeout(() => { btn.classList.remove('copied'); btn.textContent = '📋 복사하기'; }, 2000);
+}
+
+async function generate() {
+  const situation = document.getElementById('situation').value.trim();
+  if (!situation) {
+    const ta = document.getElementById('situation');
+    ta.classList.add('shake'); ta.focus();
+    setTimeout(() => ta.classList.remove('shake'), 500);
+    return;
+  }
+  hideError();
+  document.getElementById('results').classList.remove('show');
+  document.getElementById('results').innerHTML = '';
+  setLoading(true);
+  try {
+    const res = await fetch('/.netlify/functions/generate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ situation, tone: selectedTone })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || '오류가 발생했어요.');
+    setLoading(false);
+    renderResults(data.replies);
+  } catch (e) {
+    setLoading(false);
+    showError('⚠️ ' + (e.message || '오류가 발생했어요. 다시 시도해주세요.'));
+  }
+}
+</script>
+</body>
+</html>

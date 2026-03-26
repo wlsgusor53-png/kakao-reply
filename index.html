@@ -17,25 +17,17 @@
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 body { font-family: 'Noto Sans KR', sans-serif; background: var(--bg); min-height: 100dvh; display: flex; justify-content: center; }
 .app { width: 100%; max-width: 480px; padding: 0 0 60px; }
-
-/* Header */
 .header { background: var(--yellow); padding: 52px 24px 24px; text-align: center; position: relative; overflow: hidden; }
 .header::before { content: '💬'; position: absolute; font-size: 130px; opacity: .07; right: -20px; top: -10px; line-height: 1; pointer-events: none; }
 .header-tag { display: inline-block; background: rgba(0,0,0,0.1); color: var(--brown); font-size: 11px; font-weight: 700; letter-spacing: .1em; padding: 4px 12px; border-radius: 100px; margin-bottom: 10px; }
 .header h1 { font-family: 'Black Han Sans', sans-serif; font-size: 30px; color: var(--brown); line-height: 1.2; }
 .header p { font-size: 13px; color: rgba(60,30,30,0.6); margin-top: 7px; line-height: 1.6; }
-
-/* Tab */
 .tab-wrap { background: var(--surface); border-bottom: 1px solid var(--border); padding: 0 16px; display: flex; gap: 4px; overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; position: sticky; top: 0; z-index: 10; }
 .tab-wrap::-webkit-scrollbar { display: none; }
 .tab { flex-shrink: 0; padding: 14px 12px; font-size: 13px; font-weight: 500; color: var(--text3); border-bottom: 2px solid transparent; cursor: pointer; white-space: nowrap; transition: all .15s; }
 .tab.active { color: var(--brown); border-bottom-color: var(--yellow-dark); font-weight: 700; }
-
-/* Tab content */
 .tab-content { display: none; }
 .tab-content.active { display: block; }
-
-/* 답장생성 탭 */
 .card { margin: 14px 16px 0; background: var(--surface); border-radius: var(--radius); padding: 18px; box-shadow: var(--shadow); }
 .lbl { font-size: 12px; font-weight: 700; color: var(--text2); letter-spacing: .05em; text-transform: uppercase; margin-bottom: 10px; }
 textarea { width: 100%; background: var(--surface2); border: 1.5px solid transparent; border-radius: var(--radius-sm); color: var(--text); font-family: 'Noto Sans KR', sans-serif; font-size: 14px; line-height: 1.75; padding: 13px 14px; resize: none; min-height: 120px; outline: none; transition: border-color .2s; }
@@ -67,6 +59,10 @@ textarea.shake { animation: shake .4s ease; border-color: var(--red) !important;
 .results-header { display: flex; align-items: center; justify-content: space-between; }
 .results-title { font-size: 13px; font-weight: 700; color: var(--text2); }
 .results-badge { font-size: 11px; color: var(--text3); background: var(--surface); padding: 3px 10px; border-radius: 100px; box-shadow: var(--shadow); }
+.share-bar { display: flex; align-items: center; justify-content: flex-end; gap: 8px; margin: 0 16px; }
+.share-btn { display: flex; align-items: center; gap: 5px; background: var(--surface); border: 1px solid var(--border); border-radius: 100px; color: var(--text2); font-family: 'Noto Sans KR', sans-serif; font-size: 12px; font-weight: 700; padding: 7px 14px; cursor: pointer; transition: all .15s; box-shadow: var(--shadow); }
+.share-btn:active { transform: scale(.94); }
+.share-btn.copied { background: #E8F8EF; border-color: #A8DFC0; color: var(--green); }
 .reply-card { background: var(--surface); border-radius: var(--radius); padding: 18px 18px 14px; box-shadow: var(--shadow); border-left: 4px solid var(--yellow); animation: slideIn .3s ease both; }
 .reply-card:nth-child(3) { animation-delay: .07s; }
 .reply-card:nth-child(4) { animation-delay: .14s; }
@@ -91,8 +87,6 @@ textarea.shake { animation: shake .4s ease; border-color: var(--red) !important;
 .refined-footer { display: flex; justify-content: flex-end; margin-top: 10px; }
 .error-box { margin: 14px 16px 0; background: #FFF0F0; border: 1.5px solid #FFCDD2; border-radius: var(--radius-sm); padding: 14px 16px; font-size: 13px; color: var(--red); line-height: 1.6; display: none; }
 .error-box.show { display: block; }
-
-/* 가이드 탭 */
 .guide-wrap { padding: 16px; }
 .guide-section { margin-bottom: 20px; }
 .guide-section-title { font-size: 13px; font-weight: 700; color: var(--text3); letter-spacing: .06em; text-transform: uppercase; margin-bottom: 10px; }
@@ -123,8 +117,6 @@ textarea.shake { animation: shake .4s ease; border-color: var(--red) !important;
 .tip-label { font-size: 11px; font-weight: 700; color: #7A5C00; margin-bottom: 4px; }
 .tip-box p { font-size: 13px; color: #7A5C00; margin: 0; }
 .go-btn { display: block; width: 100%; background: var(--yellow); color: var(--brown); border: none; border-radius: var(--radius); font-family: 'Black Han Sans', sans-serif; font-size: 17px; padding: 16px; cursor: pointer; text-align: center; margin-top: 8px; box-shadow: 0 4px 16px rgba(254,229,0,.4); }
-
-/* 예시 탭 */
 .examples-wrap { padding: 16px; }
 .ex-section { margin-bottom: 24px; }
 .ex-section-header { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
@@ -142,11 +134,8 @@ textarea.shake { animation: shake .4s ease; border-color: var(--red) !important;
 .ex-reply.polite .ex-reply-tone { color: var(--blue); }
 .ex-reply.friendly .ex-reply-tone { color: var(--green); }
 .ex-reply.witty .ex-reply-tone { color: #E6A817; }
-.ex-try-btn { display: inline-flex; align-items: center; gap: 5px; margin-top: 10px; background: var(--yellow); border: none; border-radius: 100px; font-family: 'Noto Sans KR', sans-serif; font-size: 12px; font-weight: 700; color: var(--brown); padding: 6px 14px; cursor: pointer; transition: opacity .15s; }
-.ex-try-btn:active { opacity: .8; }
-
-/* Footer */
-.footer { margin-top: 32px; text-align: center; padding: 0 16px 0; }
+.ex-try-btn { display: inline-flex; align-items: center; gap: 5px; margin-top: 10px; background: var(--yellow); border: none; border-radius: 100px; font-family: 'Noto Sans KR', sans-serif; font-size: 12px; font-weight: 700; color: var(--brown); padding: 6px 14px; cursor: pointer; }
+.footer { margin-top: 32px; text-align: center; padding: 0 16px; }
 .footer a { font-size: 11px; color: var(--text3); text-decoration: none; }
 </style>
 </head>
@@ -158,7 +147,6 @@ textarea.shake { animation: shake .4s ease; border-color: var(--red) !important;
     <p>상황을 입력하면 AI가 맞춤 답장을<br>3개 만들어드려요 ✨</p>
   </div>
 
-  <!-- 탭 메뉴 -->
   <div class="tab-wrap">
     <div class="tab active" onclick="switchTab(0, this)">🏠 답장 생성</div>
     <div class="tab" onclick="switchTab(1, this)">📖 사용 가이드</div>
@@ -194,9 +182,7 @@ textarea.shake { animation: shake .4s ease; border-color: var(--red) !important;
       <div class="loading-txt" id="loadingTxt">상황을 분석하는 중...</div>
     </div>
     <div class="results-wrap" id="results"></div>
-    <div class="footer">
-      <a href="/privacy.html">🔒 개인정보처리방침</a>
-    </div>
+    <div class="footer"><a href="/privacy.html">🔒 개인정보처리방침</a></div>
   </div>
 
   <!-- 탭 1: 사용 가이드 -->
@@ -206,61 +192,25 @@ textarea.shake { animation: shake .4s ease; border-color: var(--red) !important;
         <div class="guide-section-title">📌 사용 방법</div>
         <div class="guide-card">
           <ul class="step-list">
-            <li>
-              <div class="step-num">1</div>
-              <div class="step-content">
-                <strong>상황을 구체적으로 입력해요</strong>
-                <p>상대방이 누구인지, 어떤 상황인지, 내가 원하는 결과가 뭔지 적어주세요.</p>
-              </div>
-            </li>
-            <li>
-              <div class="step-num">2</div>
-              <div class="step-content">
-                <strong>톤을 선택해요</strong>
-                <p>정중하게 / 친근하게 / 센스있게 중 상황에 맞는 톤을 골라요.</p>
-              </div>
-            </li>
-            <li>
-              <div class="step-num">3</div>
-              <div class="step-content">
-                <strong>답장 3개 중 마음에 드는 걸 골라요</strong>
-                <p>복사해서 카카오톡에 바로 붙여넣으면 돼요.</p>
-              </div>
-            </li>
-            <li>
-              <div class="step-num">4</div>
-              <div class="step-content">
-                <strong>다듬기로 길이를 조절해요</strong>
-                <p>슬라이더로 짧게/보통/길게 조절하고 다듬기를 눌러보세요.</p>
-              </div>
-            </li>
+            <li><div class="step-num">1</div><div class="step-content"><strong>상황을 구체적으로 입력해요</strong><p>상대방이 누구인지, 어떤 상황인지, 내가 원하는 결과가 뭔지 적어주세요.</p></div></li>
+            <li><div class="step-num">2</div><div class="step-content"><strong>톤을 선택해요</strong><p>정중하게 / 친근하게 / 센스있게 중 상황에 맞는 톤을 골라요.</p></div></li>
+            <li><div class="step-num">3</div><div class="step-content"><strong>마음에 드는 답장을 골라요</strong><p>복사해서 카카오톡에 바로 붙여넣으면 돼요.</p></div></li>
+            <li><div class="step-num">4</div><div class="step-content"><strong>다듬기로 길이를 조절해요</strong><p>슬라이더로 짧게/보통/길게 조절하고 다듬기를 눌러보세요.</p></div></li>
           </ul>
         </div>
       </div>
       <div class="guide-section">
         <div class="guide-section-title">✍️ 잘 쓰는 팁</div>
         <div class="guide-card">
-          <div class="guide-card-header">
-            <div class="guide-card-icon">🎯</div>
-            <div class="guide-card-title">상황은 구체적으로!</div>
-          </div>
+          <div class="guide-card-header"><div class="guide-card-icon">🎯</div><div class="guide-card-title">상황은 구체적으로!</div></div>
           <p>막연하게 쓰면 막연한 답장이 나와요.</p>
           <div class="compare">
-            <div class="compare-item bad">
-              <div class="compare-label">❌ 이렇게 말고</div>
-              <p>친구한테 거절하고 싶어</p>
-            </div>
-            <div class="compare-item good">
-              <div class="compare-label">✅ 이렇게!</div>
-              <p>10년 지기 친구가 50만원 빌려달라는데 기분 안 나쁘게 거절하고 싶어</p>
-            </div>
+            <div class="compare-item bad"><div class="compare-label">❌ 이렇게 말고</div><p>친구한테 거절하고 싶어</p></div>
+            <div class="compare-item good"><div class="compare-label">✅ 이렇게!</div><p>10년 지기 친구가 50만원 빌려달라는데 기분 안 나쁘게 거절하고 싶어</p></div>
           </div>
         </div>
         <div class="guide-card">
-          <div class="guide-card-header">
-            <div class="guide-card-icon">🎭</div>
-            <div class="guide-card-title">톤은 관계에 맞게!</div>
-          </div>
+          <div class="guide-card-header"><div class="guide-card-icon">🎭</div><div class="guide-card-title">톤은 관계에 맞게!</div></div>
           <div class="tone-cards">
             <div class="tone-card"><div class="t-emoji">🙏</div><div class="t-name">정중하게</div><div class="t-desc">상사, 거래처, 어른께</div></div>
             <div class="tone-card"><div class="t-emoji">😊</div><div class="t-name">친근하게</div><div class="t-desc">친구, 동료, 편한 사이</div></div>
@@ -268,15 +218,9 @@ textarea.shake { animation: shake .4s ease; border-color: var(--red) !important;
           </div>
         </div>
         <div class="guide-card">
-          <div class="guide-card-header">
-            <div class="guide-card-icon">✨</div>
-            <div class="guide-card-title">다듬기 기능 활용!</div>
-          </div>
+          <div class="guide-card-header"><div class="guide-card-icon">✨</div><div class="guide-card-title">다듬기 기능 활용!</div></div>
           <p>마음에 80%는 드는데 길이가 애매하다면?</p>
-          <div class="tip-box">
-            <div class="tip-label">💡 TIP</div>
-            <p>짧게/보통/길게 각각 눌러보면 딱 맞는 길이를 찾을 수 있어요!</p>
-          </div>
+          <div class="tip-box"><div class="tip-label">💡 TIP</div><p>짧게/보통/길게 각각 눌러보면 딱 맞는 길이를 찾을 수 있어요!</p></div>
         </div>
       </div>
       <button class="go-btn" onclick="switchTab(0, document.querySelectorAll('.tab')[0])">✨ 지금 바로 써보기</button>
@@ -286,16 +230,15 @@ textarea.shake { animation: shake .4s ease; border-color: var(--red) !important;
   <!-- 탭 2: 상황별 예시 -->
   <div class="tab-content" id="tabContent2">
     <div class="examples-wrap">
-
       <div class="ex-section">
         <div class="ex-section-header"><div class="ex-section-emoji">🙅</div><div class="ex-section-title">거절할 때</div></div>
         <div class="ex-card">
           <div class="ex-situation">상황 예시</div>
           <div class="ex-situation-text">직장 상사가 주말에 회식 오라고 했는데 선약이 있어서 거절하고 싶어.</div>
           <div class="ex-replies">
-            <div class="ex-reply polite"><div class="ex-reply-tone">🙏 정중하게</div>팀장님, 죄송하게도 이번 주말은 선약이 있어서 참석이 어려울 것 같습니다. 다음 기회엔 꼭 함께하겠습니다!</div>
-            <div class="ex-reply friendly"><div class="ex-reply-tone">😊 친근하게</div>팀장님 주말에 선약이 있어서 이번엔 못 갈 것 같아요 ㅜㅜ 다음엔 꼭 참석할게요!</div>
-            <div class="ex-reply witty"><div class="ex-reply-tone">😎 센스있게</div>팀장님 이번 주말은 몸이 이미 다른 데 예약이 됐어요ㅋㅋ 다음엔 참석각 잡겠습니다!</div>
+            <div class="ex-reply polite"><div class="ex-reply-tone">🙏 정중하게</div>팀장님, 죄송한데 이번 주말은 선약이 있어서 참석이 어려울 것 같습니다. 다음 기회엔 꼭 함께하겠습니다!</div>
+            <div class="ex-reply friendly"><div class="ex-reply-tone">😊 친근하게</div>팀장님 주말에 선약이 있어서 이번엔 못 갈 것 같아요 ㅜㅜ 다음엔 꼭 갈게요!</div>
+            <div class="ex-reply witty"><div class="ex-reply-tone">😎 센스있게</div>팀장님 이번 주말은 몸이 이미 다른 데 예약됐어요ㅋㅋ 다음엔 제가 참석각 잡겠습니다!</div>
           </div>
           <button class="ex-try-btn" onclick="switchTab(0, document.querySelectorAll('.tab')[0])">✨ 직접 생성해보기</button>
         </div>
@@ -304,27 +247,25 @@ textarea.shake { animation: shake .4s ease; border-color: var(--red) !important;
           <div class="ex-situation-text">친한 친구가 갑자기 돈 빌려달라고 했는데 사이 안 나쁘게 거절하고 싶어.</div>
           <div class="ex-replies">
             <div class="ex-reply polite"><div class="ex-reply-tone">🙏 정중하게</div>나도 요즘 여유가 없어서 도움을 못 줄 것 같아. 진짜 미안해. 다른 방법으로 도울 수 있으면 말해줘.</div>
-            <div class="ex-reply friendly"><div class="ex-reply-tone">😊 친근하게</div>아 미안 나도 요즘 빠듯해서ㅜ 도움 못 줘서 진짜 미안해! 다른 거라면 도울게~</div>
+            <div class="ex-reply friendly"><div class="ex-reply-tone">😊 친근하게</div>아 미안 나도 요즘 빠듯해서ㅜ 진짜 미안해! 다른 거라면 도울게~</div>
             <div class="ex-reply witty"><div class="ex-reply-tone">😎 센스있게</div>나도 지금 내 통장이 날 빌려달라고 하는 중이야ㅋㅋ 진짜 미안해ㅜ</div>
           </div>
           <button class="ex-try-btn" onclick="switchTab(0, document.querySelectorAll('.tab')[0])">✨ 직접 생성해보기</button>
         </div>
       </div>
-
       <div class="ex-section">
         <div class="ex-section-header"><div class="ex-section-emoji">🙏</div><div class="ex-section-title">사과할 때</div></div>
         <div class="ex-card">
           <div class="ex-situation">상황 예시</div>
           <div class="ex-situation-text">친구와 약속을 잊어버려서 바람맞혔어. 진심으로 사과하고 싶어.</div>
           <div class="ex-replies">
-            <div class="ex-reply polite"><div class="ex-reply-tone">🙏 정중하게</div>정말 미안해. 내가 약속을 잊어버린 건 변명의 여지가 없어. 많이 기다렸을 텐데 진심으로 사과해.</div>
-            <div class="ex-reply friendly"><div class="ex-reply-tone">😊 친근하게</div>야 진짜 미안해ㅠㅠ 내가 완전 실수했어. 밥 한번 사도 될까?</div>
-            <div class="ex-reply witty"><div class="ex-reply-tone">😎 센스있게</div>내 뇌가 오늘 완전 파업했나봐ㅠ 진짜 미안해!! 사과의 의미로 내가 쏠게 언제 시간 돼?</div>
+            <div class="ex-reply polite"><div class="ex-reply-tone">🙏 정중하게</div>진짜 미안해. 약속 잊어버린 건 변명의 여지가 없어. 많이 기다렸을 텐데 진심으로 사과해.</div>
+            <div class="ex-reply friendly"><div class="ex-reply-tone">😊 친근하게</div>야 진짜 미안해ㅠㅠ 완전 실수했어. 밥 한번 사도 될까?</div>
+            <div class="ex-reply witty"><div class="ex-reply-tone">😎 센스있게</div>내 뇌가 오늘 파업했나봐ㅠ 진짜 미안해!! 사과의 의미로 내가 쏠게 언제 시간 돼?</div>
           </div>
           <button class="ex-try-btn" onclick="switchTab(0, document.querySelectorAll('.tab')[0])">✨ 직접 생성해보기</button>
         </div>
       </div>
-
       <div class="ex-section">
         <div class="ex-section-header"><div class="ex-section-emoji">👋</div><div class="ex-section-title">오랜만에 연락할 때</div></div>
         <div class="ex-card">
@@ -338,25 +279,23 @@ textarea.shake { animation: shake .4s ease; border-color: var(--red) !important;
           <button class="ex-try-btn" onclick="switchTab(0, document.querySelectorAll('.tab')[0])">✨ 직접 생성해보기</button>
         </div>
       </div>
-
       <div class="ex-section">
         <div class="ex-section-header"><div class="ex-section-emoji">🎉</div><div class="ex-section-title">축하할 때</div></div>
         <div class="ex-card">
           <div class="ex-situation">상황 예시</div>
           <div class="ex-situation-text">친구가 취업 합격 소식을 전해줬어. 진심으로 축하해주고 싶어.</div>
           <div class="ex-replies">
-            <div class="ex-reply polite"><div class="ex-reply-tone">🙏 정중하게</div>정말 축하해! 그동안 열심히 준비한 게 드디어 결실을 맺었구나. 앞으로도 잘 될 거야!</div>
+            <div class="ex-reply polite"><div class="ex-reply-tone">🙏 정중하게</div>진짜 축하해! 그동안 열심히 준비한 게 드디어 결실을 맺었구나. 앞으로도 잘 될 거야!</div>
             <div class="ex-reply friendly"><div class="ex-reply-tone">😊 친근하게</div>오 대박!! 진짜 축하해🎉 고생한 만큼 좋은 결과 나왔다!! 한턱 쏴!!ㅋㅋ</div>
-            <div class="ex-reply witty"><div class="ex-reply-tone">😎 센스있게</div>이제 나 아는 사람 중에 직장인 하나 생겼다ㅋㅋ 진짜 축하해!! 첫 월급날 기다릴게😎</div>
+            <div class="ex-reply witty"><div class="ex-reply-tone">😎 센스있게</div>이제 내 주변에 직장인 하나 생겼다ㅋㅋ 진짜 축하해!! 첫 월급날 기다릴게😎</div>
           </div>
           <button class="ex-try-btn" onclick="switchTab(0, document.querySelectorAll('.tab')[0])">✨ 직접 생성해보기</button>
         </div>
       </div>
-
     </div>
   </div>
-
 </div>
+
 <script>
 let selectedTone = 'friendly';
 let storedReplies = [];
@@ -366,9 +305,7 @@ const loadingMsgs = ['상황을 분석하는 중...','관계와 맥락을 파악
 const lengthLabels = {1:'짧게', 2:'보통', 3:'길게'};
 
 function switchTab(n, el) {
-  document.querySelectorAll('.tab-content').forEach((c, i) => {
-    c.classList.toggle('active', i === n);
-  });
+  document.querySelectorAll('.tab-content').forEach((c, i) => c.classList.toggle('active', i === n));
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
   el.classList.add('active');
   window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -418,6 +355,19 @@ async function copyText(btn, text) {
   }
   btn.classList.add('copied'); btn.textContent = '✅ 복사됐어요!';
   setTimeout(() => { btn.classList.remove('copied'); btn.textContent = '📋 복사하기'; }, 2000);
+}
+
+async function shareLink(btn) {
+  const url = 'https://kakaoreply.netlify.app';
+  try { await navigator.clipboard.writeText(url); }
+  catch {
+    const ta = document.createElement('textarea');
+    ta.value = url; ta.style.cssText = 'position:fixed;top:0;left:0;opacity:0;';
+    document.body.appendChild(ta); ta.focus(); ta.select();
+    document.execCommand('copy'); document.body.removeChild(ta);
+  }
+  btn.classList.add('copied'); btn.textContent = '✅ 링크 복사됐어요!';
+  setTimeout(() => { btn.classList.remove('copied'); btn.textContent = '🔗 친구한테 공유하기'; }, 2500);
 }
 
 function updateLengthLabel(idx) {
@@ -487,6 +437,7 @@ function renderResults(replies) {
         </div>
       </div>
     `).join('')}
+    <button class="share-btn" onclick="shareLink(this)">🔗 친구한테 공유하기</button>
   `;
   wrap.classList.add('show');
   setTimeout(() => wrap.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);

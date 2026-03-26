@@ -3,13 +3,10 @@ exports.handler = async function(event) {
     return { statusCode: 405, body: 'Method Not Allowed' };
   }
 
-  const { situation, tone } = JSON.parse(event.body || '{}');
+  const { situation, tone, mode, length } = JSON.parse(event.body || '{}');
 
   if (!situation || !tone) {
-    return {
-      statusCode: 400,
-      body: JSON.stringify({ error: '상황과 톤을 입력해주세요.' })
-    };
+    return { statusCode: 400, body: JSON.stringify({ error: '상황과 톤을 입력해주세요.' }) };
   }
 
   const toneGuide = {
@@ -18,7 +15,31 @@ exports.handler = async function(event) {
     witty: '재치 있고 유머러스한 말투. 센스 있는 표현. 가볍고 재미있게.'
   };
 
-  const prompt = `너는 카카오톡 메시지를 잘 쓰는 한국인 전문가야.
+  const lengthGuide = {
+    '짧게': '1문장 이내로 아주 짧고 간결하게.',
+    '보통': '1~2문장으로 자연스럽게.',
+    '길게': '2~4문장으로 충분히 내용을 담아서.'
+  };
+
+  let prompt;
+
+  if (mode === 'refine') {
+    const lengthInstruction = length ? (lengthGuide[length] || lengthGuide['보통']) : lengthGuide['보통'];
+    prompt = `다음 카카오톡 메시지를 더 자연스럽고 매끄럽게 다듬어줘.
+
+[원본 메시지]
+${situation}
+
+[다듬기 조건]
+- 말투: ${toneGuide[tone] || toneGuide.friendly}
+- 길이: ${lengthInstruction}
+- 원본의 핵심 의도는 유지하되 더 자연스럽게
+- 이모지 적절히 사용
+
+다듬어진 메시지 본문만 출력해줘. 설명, 번호, 따옴표 없이.`;
+
+  } else {
+    prompt = `너는 카카오톡 메시지를 잘 쓰는 한국인 전문가야.
 
 [상황]
 ${situation}
@@ -44,6 +65,7 @@ ${toneGuide[tone] || toneGuide.friendly}
 두 번째 답장
 ---
 세 번째 답장`;
+  }
 
   try {
     const res = await fetch('https://api.openai.com/v1/chat/completions', {
@@ -65,18 +87,20 @@ ${toneGuide[tone] || toneGuide.friendly}
 
     if (!res.ok) {
       const err = await res.json().catch(() => ({}));
-      return {
-        statusCode: res.status,
-        body: JSON.stringify({ error: err?.error?.message || 'OpenAI 오류가 발생했어요.' })
-      };
+      return { statusCode: res.status, body: JSON.stringify({ error: err?.error?.message || 'OpenAI 오류가 발생했어요.' }) };
     }
 
     const data = await res.json();
     const raw = data.choices?.[0]?.message?.content?.trim() ?? '';
-    const parts = raw.split(/\n?---\n?/).map(s => s.trim()).filter(s => s.length > 0);
 
-    let replies = parts.slice(0, 3);
-    while (replies.length < 3) replies.push(replies[replies.length - 1]);
+    let replies;
+    if (mode === 'refine') {
+      replies = [raw];
+    } else {
+      const parts = raw.split(/\n?---\n?/).map(s => s.trim()).filter(s => s.length > 0);
+      replies = parts.slice(0, 3);
+      while (replies.length < 3) replies.push(replies[replies.length - 1]);
+    }
 
     return {
       statusCode: 200,
@@ -85,9 +109,6 @@ ${toneGuide[tone] || toneGuide.friendly}
     };
 
   } catch (e) {
-    return {
-      statusCode: 500,
-      body: JSON.stringify({ error: '서버 오류가 발생했어요. 다시 시도해주세요.' })
-    };
+    return { statusCode: 500, body: JSON.stringify({ error: '서버 오류가 발생했어요. 다시 시도해주세요.' }) };
   }
 };

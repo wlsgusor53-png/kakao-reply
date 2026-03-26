@@ -5,288 +5,346 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>카카오톡 답장 생성기 - AI가 만들어주는 맞춤 답장</title>
 <meta name="description" content="상황을 입력하면 AI가 카카오톡 답장을 3개 만들어드려요. 정중하게, 친근하게, 센스있게 골라보세요!">
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&family=Black+Han+Sans&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
 <style>
 :root {
-  --yellow: #FEE500; --yellow-dark: #E6CF00; --brown: #3C1E1E;
-  --bg: #F7F3E9; --surface: #FFFFFF; --surface2: #F5F0E8;
-  --border: rgba(0,0,0,0.08); --text: #1A1A1A; --text2: #6B6B6B; --text3: #9A9A9A;
-  --green: #3CB371; --red: #E24B4A; --blue: #185FA5; --blue-bg: #EEF4FF; --blue-border: #C0D4F5;
-  --radius: 18px; --radius-sm: 12px; --shadow: 0 2px 12px rgba(0,0,0,0.08);
+  --yellow: #FEE500;
+  --yellow-dark: #E6CF00;
+  --bg: #F8F9FA;
+  --surface: #FFFFFF;
+  --text: #191919;
+  --text2: #8B95A1;
+  --text3: #C5CCD4;
+  --border: #E8ECF0;
+  --border2: #F2F4F6;
+  --green: #00B493;
+  --red: #F04452;
+  --radius: 16px;
+  --radius-sm: 12px;
 }
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-body { font-family: 'Noto Sans KR', sans-serif; background: var(--bg); min-height: 100dvh; display: flex; justify-content: center; }
-.app { width: 100%; max-width: 480px; padding: 0 0 60px; }
-.header { background: var(--yellow); padding: 52px 24px 24px; text-align: center; position: relative; overflow: hidden; }
-.header::before { content: '💬'; position: absolute; font-size: 130px; opacity: .07; right: -20px; top: -10px; line-height: 1; pointer-events: none; }
-.header-tag { display: inline-block; background: rgba(0,0,0,0.1); color: var(--brown); font-size: 11px; font-weight: 700; letter-spacing: .1em; padding: 4px 12px; border-radius: 100px; margin-bottom: 10px; }
-.header h1 { font-family: 'Black Han Sans', sans-serif; font-size: 30px; color: var(--brown); line-height: 1.2; }
-.header p { font-size: 13px; color: rgba(60,30,30,0.6); margin-top: 7px; line-height: 1.6; }
-.tab-wrap { background: var(--surface); border-bottom: 1px solid var(--border); padding: 0 16px; display: flex; gap: 4px; overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; position: sticky; top: 0; z-index: 10; }
-.tab-wrap::-webkit-scrollbar { display: none; }
-.tab { flex-shrink: 0; padding: 14px 12px; font-size: 13px; font-weight: 500; color: var(--text3); border-bottom: 2px solid transparent; cursor: pointer; white-space: nowrap; transition: all .15s; }
-.tab.active { color: var(--brown); border-bottom-color: var(--yellow-dark); font-weight: 700; }
+body { font-family: 'Noto Sans KR', -apple-system, sans-serif; background: var(--bg); min-height: 100dvh; display: flex; justify-content: center; }
+.app { width: 100%; max-width: 480px; }
+
+/* Header */
+.header { background: var(--surface); padding: 48px 24px 28px; }
+.chip { display: inline-flex; align-items: center; gap: 6px; background: #FFF8E1; border-radius: 100px; padding: 5px 12px; margin-bottom: 16px; }
+.chip-dot { width: 7px; height: 7px; background: var(--yellow); border-radius: 50%; }
+.chip-txt { font-size: 11px; font-weight: 700; color: #B8860B; letter-spacing: .05em; }
+.header h1 { font-size: 28px; font-weight: 900; color: var(--text); line-height: 1.2; letter-spacing: -.03em; }
+.header p { font-size: 14px; color: var(--text2); margin-top: 8px; line-height: 1.65; }
+
+/* Tab */
+.tab-bar { background: var(--surface); display: flex; border-bottom: 1px solid var(--border2); padding: 0 20px; position: sticky; top: 0; z-index: 10; }
+.tab { flex: 1; padding: 14px 0; text-align: center; font-size: 13px; font-weight: 500; color: var(--text3); border-bottom: 2px solid transparent; cursor: pointer; transition: all .15s; white-space: nowrap; }
+.tab.active { color: var(--text); border-bottom-color: var(--yellow); font-weight: 700; }
+
+/* Tab content */
 .tab-content { display: none; }
 .tab-content.active { display: block; }
-.card { margin: 14px 16px 0; background: var(--surface); border-radius: var(--radius); padding: 18px; box-shadow: var(--shadow); }
-.lbl { font-size: 12px; font-weight: 700; color: var(--text2); letter-spacing: .05em; text-transform: uppercase; margin-bottom: 10px; }
-textarea { width: 100%; background: var(--surface2); border: 1.5px solid transparent; border-radius: var(--radius-sm); color: var(--text); font-family: 'Noto Sans KR', sans-serif; font-size: 14px; line-height: 1.75; padding: 13px 14px; resize: none; min-height: 120px; outline: none; transition: border-color .2s; }
-textarea::placeholder { color: var(--text3); }
-textarea:focus { border-color: var(--yellow-dark); }
-textarea.shake { animation: shake .4s ease; border-color: var(--red) !important; }
-@keyframes shake { 0%,100%{transform:translateX(0)} 20%{transform:translateX(-6px)} 40%{transform:translateX(6px)} 60%{transform:translateX(-4px)} 80%{transform:translateX(4px)} }
+
+/* Section */
+.section { padding: 20px 20px 0; }
+.section-label { font-size: 12px; font-weight: 700; color: var(--text2); letter-spacing: .04em; margin-bottom: 10px; }
+
+/* Input */
+.input-box { background: var(--surface); border-radius: var(--radius); padding: 16px; }
+.input-box textarea { width: 100%; background: transparent; border: none; outline: none; font-family: inherit; font-size: 14px; color: var(--text); line-height: 1.75; resize: none; min-height: 110px; }
+.input-box textarea::placeholder { color: var(--text3); }
 .char-count { text-align: right; font-size: 11px; color: var(--text3); margin-top: 6px; }
+
+/* Tone */
 .tone-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
-.tone-btn { background: var(--surface2); border: 1.5px solid transparent; border-radius: var(--radius-sm); color: var(--text2); font-family: 'Noto Sans KR', sans-serif; font-size: 13px; font-weight: 500; padding: 12px 6px; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 5px; transition: all .15s; }
-.tone-btn .icon { font-size: 20px; }
-.tone-btn:active { transform: scale(.95); }
-.tone-btn.active { background: var(--yellow); border-color: var(--yellow-dark); color: var(--brown); font-weight: 700; box-shadow: 0 2px 8px rgba(254,229,0,.4); }
+.tone-btn { background: var(--surface); border: 1.5px solid var(--border); border-radius: var(--radius-sm); padding: 14px 6px; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 5px; transition: all .15s; }
+.tone-btn .t-em { font-size: 22px; }
+.tone-btn .t-nm { font-size: 12px; font-weight: 700; color: var(--text); }
+.tone-btn .t-ds { font-size: 10px; color: var(--text2); text-align: center; line-height: 1.4; }
+.tone-btn:active { transform: scale(.96); }
+.tone-btn.active { border-color: var(--yellow); background: #FFFDE7; }
 .tone-btn.shake { animation: shake .4s ease; }
-.gen-wrap { margin: 14px 16px 0; }
-.gen-btn { width: 100%; background: var(--yellow); color: var(--brown); border: none; border-radius: var(--radius); font-family: 'Black Han Sans', sans-serif; font-size: 18px; padding: 17px; cursor: pointer; transition: all .15s; box-shadow: 0 4px 16px rgba(254,229,0,.5); display: flex; align-items: center; justify-content: center; gap: 8px; }
-.gen-btn:active { transform: scale(.98); }
-.gen-btn:disabled { opacity: .5; cursor: not-allowed; transform: none; }
-.loading { display: none; flex-direction: column; align-items: center; padding: 36px 0 24px; gap: 16px; }
+@keyframes shake { 0%,100%{transform:translateX(0)} 20%{transform:translateX(-5px)} 40%{transform:translateX(5px)} 60%{transform:translateX(-3px)} 80%{transform:translateX(3px)} }
+
+/* Gen button */
+.gen-btn { display: block; width: 100%; background: var(--yellow); color: var(--text); border: none; border-radius: var(--radius); font-family: inherit; font-size: 16px; font-weight: 900; padding: 17px; cursor: pointer; letter-spacing: -.02em; margin-top: 10px; transition: opacity .15s; }
+.gen-btn:active { opacity: .85; }
+.gen-btn:disabled { opacity: .4; cursor: not-allowed; }
+
+/* Error */
+.error-box { margin: 12px 20px 0; background: #FFF0F2; border-radius: var(--radius-sm); padding: 12px 16px; font-size: 13px; color: var(--red); display: none; }
+.error-box.show { display: block; }
+
+/* Loading */
+.loading { display: none; flex-direction: column; align-items: center; padding: 40px 0; gap: 14px; }
 .loading.show { display: flex; }
-.dots { display: flex; gap: 8px; }
-.dot { width: 10px; height: 10px; background: var(--yellow-dark); border-radius: 50%; animation: bounce 1.2s ease-in-out infinite; }
+.dots { display: flex; gap: 7px; }
+.dot { width: 9px; height: 9px; background: var(--yellow-dark); border-radius: 50%; animation: bounce 1.2s ease-in-out infinite; }
 .dot:nth-child(2) { animation-delay: .2s; }
 .dot:nth-child(3) { animation-delay: .4s; }
-@keyframes bounce { 0%,80%,100% { transform: scale(.5); opacity: .3; } 40% { transform: scale(1); opacity: 1; } }
+@keyframes bounce { 0%,80%,100%{transform:scale(.45);opacity:.3} 40%{transform:scale(1);opacity:1} }
 .loading-txt { font-size: 14px; color: var(--text2); font-weight: 500; }
-.results-wrap { display: none; flex-direction: column; gap: 12px; margin: 14px 16px 0; animation: fadeUp .4s ease; }
-.results-wrap.show { display: flex; }
-@keyframes fadeUp { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
-.results-header { display: flex; align-items: center; justify-content: space-between; }
-.results-title { font-size: 13px; font-weight: 700; color: var(--text2); }
-.results-badge { font-size: 11px; color: var(--text3); background: var(--surface); padding: 3px 10px; border-radius: 100px; box-shadow: var(--shadow); }
-.share-btn { display: flex; align-items: center; gap: 5px; background: var(--surface); border: 1px solid var(--border); border-radius: 100px; color: var(--text2); font-family: 'Noto Sans KR', sans-serif; font-size: 12px; font-weight: 700; padding: 7px 14px; cursor: pointer; transition: all .15s; box-shadow: var(--shadow); }
-.share-btn:active { transform: scale(.94); }
-.share-btn.copied { background: #E8F8EF; border-color: #A8DFC0; color: var(--green); }
-.reply-card { background: var(--surface); border-radius: var(--radius); padding: 18px 18px 14px; box-shadow: var(--shadow); border-left: 4px solid var(--yellow); animation: slideIn .3s ease both; }
-.reply-card:nth-child(3) { animation-delay: .07s; }
-.reply-card:nth-child(4) { animation-delay: .14s; }
-@keyframes slideIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-.reply-num { font-size: 11px; font-weight: 700; color: var(--text3); letter-spacing: .08em; margin-bottom: 8px; }
-.reply-text { font-size: 15px; color: var(--text); line-height: 1.8; white-space: pre-wrap; word-break: keep-all; }
-.refine-area { margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--border); }
-.length-labels { display: flex; justify-content: space-between; font-size: 10px; color: var(--text3); margin-bottom: 4px; padding-right: 34px; }
+
+/* Divider */
+.divider { height: 8px; background: var(--bg); margin-top: 20px; }
+
+/* Results */
+.results-section { padding: 20px 20px 0; display: none; }
+.results-section.show { display: block; }
+.results-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+.results-title { font-size: 12px; font-weight: 700; color: var(--text2); letter-spacing: .04em; }
+.results-cnt { font-size: 11px; color: var(--text3); background: var(--surface); border: 1px solid var(--border); border-radius: 100px; padding: 3px 10px; }
+
+/* Reply card */
+.reply-card { background: var(--surface); border-radius: var(--radius); padding: 18px; margin-bottom: 10px; animation: slideUp .3s ease both; }
+.reply-card:nth-child(3) { animation-delay: .06s; }
+.reply-card:nth-child(4) { animation-delay: .12s; }
+@keyframes slideUp { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
+.reply-idx { font-size: 11px; font-weight: 700; color: var(--text3); letter-spacing: .06em; margin-bottom: 8px; }
+.reply-txt { font-size: 15px; color: var(--text); line-height: 1.8; white-space: pre-wrap; word-break: keep-all; }
+.reply-divider { height: 1px; background: var(--border2); margin: 14px 0; }
+.slider-labels { display: flex; justify-content: space-between; font-size: 10px; color: var(--text3); margin-bottom: 5px; padding-right: 36px; }
 .slider-row { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
-.slider-row input[type=range] { flex: 1; accent-color: var(--blue); }
-.length-val { font-size: 12px; font-weight: 700; color: var(--blue); min-width: 24px; text-align: right; }
-.reply-footer { display: flex; justify-content: flex-end; gap: 8px; }
-.copy-btn { display: flex; align-items: center; gap: 5px; background: var(--surface2); border: 1px solid var(--border); border-radius: 100px; color: var(--text2); font-family: 'Noto Sans KR', sans-serif; font-size: 12px; font-weight: 700; padding: 6px 14px; cursor: pointer; transition: all .15s; }
-.copy-btn:active { transform: scale(.94); }
-.copy-btn.copied { background: #E8F8EF; border-color: #A8DFC0; color: var(--green); }
-.refine-btn { display: flex; align-items: center; gap: 5px; background: var(--blue-bg); border: 1px solid var(--blue-border); border-radius: 100px; color: var(--blue); font-family: 'Noto Sans KR', sans-serif; font-size: 12px; font-weight: 700; padding: 6px 14px; cursor: pointer; transition: all .15s; }
-.refine-btn:active { transform: scale(.94); }
-.refine-btn:disabled { opacity: .4; cursor: not-allowed; transform: none; }
-.refined-box { margin-top: 12px; background: #F0F6FF; border: 1.5px solid var(--blue-border); border-radius: var(--radius-sm); padding: 13px 14px; animation: fadeUp .3s ease; }
-.refined-label { font-size: 10px; font-weight: 700; color: var(--blue); margin-bottom: 6px; }
-.refined-text { font-size: 15px; color: var(--text); line-height: 1.8; white-space: pre-wrap; word-break: keep-all; }
+.slider-row input[type=range] { flex: 1; accent-color: var(--text); }
+.slider-val { font-size: 12px; font-weight: 700; color: var(--text); min-width: 26px; text-align: right; }
+.reply-btns { display: flex; justify-content: flex-end; gap: 8px; }
+.btn-refine { background: var(--border2); border: none; border-radius: 100px; font-family: inherit; font-size: 12px; font-weight: 700; color: var(--text); padding: 7px 14px; cursor: pointer; transition: all .15s; }
+.btn-refine:active { transform: scale(.95); }
+.btn-refine:disabled { opacity: .4; cursor: not-allowed; }
+.btn-copy { background: var(--text); border: none; border-radius: 100px; font-family: inherit; font-size: 12px; font-weight: 700; color: #fff; padding: 7px 14px; cursor: pointer; transition: all .15s; }
+.btn-copy:active { transform: scale(.95); }
+.btn-copy.copied { background: var(--green); }
+
+/* Refined box */
+.refined-box { margin-top: 12px; background: var(--bg); border-radius: var(--radius-sm); padding: 14px; animation: slideUp .3s ease; }
+.refined-lbl { font-size: 10px; font-weight: 700; color: var(--text2); margin-bottom: 7px; }
+.refined-txt { font-size: 14px; color: var(--text); line-height: 1.8; white-space: pre-wrap; word-break: keep-all; }
 .refined-footer { display: flex; justify-content: flex-end; margin-top: 10px; }
-.error-box { margin: 14px 16px 0; background: #FFF0F0; border: 1.5px solid #FFCDD2; border-radius: var(--radius-sm); padding: 14px 16px; font-size: 13px; color: var(--red); line-height: 1.6; display: none; }
-.error-box.show { display: block; }
-.guide-wrap { padding: 16px; }
-.guide-section { margin-bottom: 20px; }
-.guide-section-title { font-size: 13px; font-weight: 700; color: var(--text3); letter-spacing: .06em; text-transform: uppercase; margin-bottom: 10px; }
-.guide-card { background: var(--surface); border-radius: var(--radius); padding: 18px; box-shadow: var(--shadow); margin-bottom: 10px; }
-.guide-card-header { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
-.guide-card-icon { font-size: 22px; }
-.guide-card-title { font-size: 15px; font-weight: 700; color: var(--text); }
-.guide-card p { font-size: 14px; color: #444; line-height: 1.8; }
-.step-list { list-style: none; padding: 0; }
+
+/* Share */
+.share-row { display: flex; justify-content: center; margin: 16px 0 0; }
+.share-btn { display: flex; align-items: center; gap: 7px; background: var(--surface); border: 1.5px solid var(--border); border-radius: 100px; font-family: inherit; font-size: 13px; font-weight: 700; color: var(--text2); padding: 10px 20px; cursor: pointer; transition: all .15s; }
+.share-btn:active { transform: scale(.96); }
+.share-btn.copied { border-color: var(--green); color: var(--green); }
+.share-dot { width: 7px; height: 7px; background: var(--yellow); border-radius: 50%; flex-shrink: 0; }
+
+/* Footer */
+.footer-link { text-align: center; padding: 24px 0 40px; }
+.footer-link a { font-size: 11px; color: var(--text3); text-decoration: none; }
+
+/* Guide */
+.guide-wrap { padding: 20px; }
+.g-section { margin-bottom: 24px; }
+.g-section-lbl { font-size: 12px; font-weight: 700; color: var(--text2); letter-spacing: .04em; margin-bottom: 10px; }
+.g-card { background: var(--surface); border-radius: var(--radius); padding: 20px; margin-bottom: 8px; }
+.g-card-hdr { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+.g-card-icon { font-size: 20px; }
+.g-card-title { font-size: 15px; font-weight: 700; color: var(--text); }
+.g-card p { font-size: 14px; color: var(--text2); line-height: 1.75; }
+.step-list { list-style: none; }
 .step-list li { display: flex; gap: 12px; margin-bottom: 14px; align-items: flex-start; }
-.step-num { width: 26px; height: 26px; background: var(--yellow); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; color: var(--brown); flex-shrink: 0; margin-top: 2px; }
-.step-content strong { font-size: 14px; font-weight: 700; display: block; margin-bottom: 3px; }
-.step-content p { font-size: 13px; color: var(--text2); margin: 0; }
-.compare { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
-.compare-item { border-radius: 10px; padding: 12px; }
-.compare-item.bad { background: #FFF0F0; border: 1.5px solid #FFCDD2; }
-.compare-item.good { background: #E8F8EF; border: 1.5px solid #A8DFC0; }
-.compare-label { font-size: 11px; font-weight: 700; margin-bottom: 5px; }
-.compare-item.bad .compare-label { color: var(--red); }
-.compare-item.good .compare-label { color: var(--green); }
-.compare-item p { font-size: 12px; color: #444; margin: 0; line-height: 1.6; }
-.tone-cards { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-top: 10px; }
-.tone-card { background: var(--surface2); border-radius: 10px; padding: 12px 8px; text-align: center; }
-.tone-card .t-emoji { font-size: 22px; margin-bottom: 5px; }
-.tone-card .t-name { font-size: 12px; font-weight: 700; color: var(--text); margin-bottom: 4px; }
-.tone-card .t-desc { font-size: 10px; color: var(--text2); line-height: 1.5; }
-.tip-box { background: #FFF8DC; border-left: 4px solid var(--yellow); border-radius: 0 10px 10px 0; padding: 12px 14px; margin-top: 10px; }
-.tip-label { font-size: 11px; font-weight: 700; color: #7A5C00; margin-bottom: 4px; }
-.tip-box p { font-size: 13px; color: #7A5C00; margin: 0; }
-.go-btn { display: block; width: 100%; background: var(--yellow); color: var(--brown); border: none; border-radius: var(--radius); font-family: 'Black Han Sans', sans-serif; font-size: 17px; padding: 16px; cursor: pointer; text-align: center; margin-top: 8px; box-shadow: 0 4px 16px rgba(254,229,0,.4); }
-.examples-wrap { padding: 16px; }
-.ex-section { margin-bottom: 24px; }
-.ex-section-header { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
-.ex-section-emoji { font-size: 22px; }
-.ex-section-title { font-size: 16px; font-weight: 900; color: var(--text); }
-.ex-card { background: var(--surface); border-radius: var(--radius); padding: 16px; box-shadow: var(--shadow); margin-bottom: 10px; }
-.ex-situation { font-size: 12px; font-weight: 700; color: var(--text3); letter-spacing: .06em; margin-bottom: 6px; }
-.ex-situation-text { font-size: 13px; color: #444; background: var(--surface2); border-radius: 10px; padding: 10px 12px; margin-bottom: 12px; line-height: 1.6; }
-.ex-replies { display: flex; flex-direction: column; gap: 7px; }
-.ex-reply { border-radius: 8px; padding: 9px 12px; font-size: 13px; line-height: 1.7; }
-.ex-reply.polite { background: #F0F6FF; border-left: 3px solid var(--blue); }
-.ex-reply.friendly { background: #F0FBF4; border-left: 3px solid var(--green); }
-.ex-reply.witty { background: #FFF8E7; border-left: 3px solid #E6A817; }
+.step-num { width: 24px; height: 24px; background: var(--yellow); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 900; color: var(--text); flex-shrink: 0; margin-top: 1px; }
+.step-body strong { font-size: 14px; font-weight: 700; color: var(--text); display: block; margin-bottom: 2px; }
+.step-body p { font-size: 13px; color: var(--text2); margin: 0; }
+.compare { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; }
+.cmp { border-radius: 10px; padding: 12px; }
+.cmp.bad { background: #FFF0F2; }
+.cmp.good { background: #E8FBF7; }
+.cmp-lbl { font-size: 11px; font-weight: 700; margin-bottom: 5px; }
+.cmp.bad .cmp-lbl { color: var(--red); }
+.cmp.good .cmp-lbl { color: var(--green); }
+.cmp p { font-size: 12px; color: var(--text); margin: 0; line-height: 1.6; }
+.tone-info { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-top: 10px; }
+.tone-info-item { background: var(--bg); border-radius: 10px; padding: 12px 8px; text-align: center; }
+.tone-info-em { font-size: 20px; margin-bottom: 4px; }
+.tone-info-nm { font-size: 12px; font-weight: 700; color: var(--text); margin-bottom: 3px; }
+.tone-info-ds { font-size: 10px; color: var(--text2); line-height: 1.4; }
+.tip-box { background: #FFF8E1; border-radius: 10px; padding: 12px 14px; margin-top: 10px; }
+.tip-lbl { font-size: 11px; font-weight: 700; color: #B8860B; margin-bottom: 4px; }
+.tip-box p { font-size: 13px; color: #B8860B; margin: 0; line-height: 1.6; }
+.go-btn { display: block; width: 100%; background: var(--yellow); color: var(--text); border: none; border-radius: var(--radius); font-family: inherit; font-size: 16px; font-weight: 900; padding: 16px; cursor: pointer; margin-top: 4px; letter-spacing: -.02em; }
+
+/* Examples */
+.ex-wrap { padding: 20px; }
+.ex-section { margin-bottom: 28px; }
+.ex-section-hdr { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
+.ex-em { font-size: 20px; }
+.ex-title { font-size: 16px; font-weight: 900; color: var(--text); letter-spacing: -.02em; }
+.ex-card { background: var(--surface); border-radius: var(--radius); padding: 16px; margin-bottom: 8px; }
+.ex-sit-lbl { font-size: 11px; font-weight: 700; color: var(--text3); letter-spacing: .04em; margin-bottom: 6px; }
+.ex-sit-txt { font-size: 13px; color: var(--text2); background: var(--bg); border-radius: 10px; padding: 10px 12px; margin-bottom: 12px; line-height: 1.65; }
+.ex-replies { display: flex; flex-direction: column; gap: 6px; }
+.ex-reply { border-radius: 10px; padding: 10px 12px; font-size: 13px; line-height: 1.7; }
+.ex-reply.polite { background: #F0F6FF; }
+.ex-reply.friendly { background: #E8FBF7; }
+.ex-reply.witty { background: #FFF8E1; }
 .ex-reply-tone { font-size: 10px; font-weight: 700; margin-bottom: 3px; }
-.ex-reply.polite .ex-reply-tone { color: var(--blue); }
+.ex-reply.polite .ex-reply-tone { color: #185FA5; }
 .ex-reply.friendly .ex-reply-tone { color: var(--green); }
-.ex-reply.witty .ex-reply-tone { color: #E6A817; }
-.ex-try-btn { display: inline-flex; align-items: center; gap: 5px; margin-top: 10px; background: var(--yellow); border: none; border-radius: 100px; font-family: 'Noto Sans KR', sans-serif; font-size: 12px; font-weight: 700; color: var(--brown); padding: 6px 14px; cursor: pointer; }
-.footer { margin-top: 32px; text-align: center; padding: 0 16px; }
-.footer a { font-size: 11px; color: var(--text3); text-decoration: none; }
+.ex-reply.witty .ex-reply-tone { color: #B8860B; }
+.ex-reply-txt { color: var(--text); }
+.ex-try { display: inline-flex; align-items: center; gap: 5px; margin-top: 10px; background: var(--yellow); border: none; border-radius: 100px; font-family: inherit; font-size: 12px; font-weight: 700; color: var(--text); padding: 7px 14px; cursor: pointer; }
 </style>
 </head>
 <body>
 <div class="app">
   <div class="header">
-    <div class="header-tag">AI POWERED</div>
+    <div class="chip"><div class="chip-dot"></div><span class="chip-txt">AI POWERED</span></div>
     <h1>카카오톡<br>답장 생성기</h1>
-    <p>상황을 입력하면 AI가 맞춤 답장을<br>3개 만들어드려요 ✨</p>
+    <p>상황을 입력하면 딱 맞는 답장<br>3개를 만들어드려요</p>
   </div>
 
-  <div class="tab-wrap">
-    <div class="tab active" onclick="switchTab(0, this)">🏠 답장 생성</div>
-    <div class="tab" onclick="switchTab(1, this)">📖 사용 가이드</div>
-    <div class="tab" onclick="switchTab(2, this)">💬 상황별 예시</div>
+  <div class="tab-bar">
+    <div class="tab active" onclick="switchTab(0,this)">답장 생성</div>
+    <div class="tab" onclick="switchTab(1,this)">사용 가이드</div>
+    <div class="tab" onclick="switchTab(2,this)">상황별 예시</div>
   </div>
 
-  <div class="tab-content active" id="tabContent0">
-    <div class="card">
-      <div class="lbl">📝 상황 설명</div>
-      <textarea id="situation" maxlength="600" placeholder="구체적으로 적을수록 더 좋은 답장이 나와요!
+  <!-- 탭0: 답장 생성 -->
+  <div class="tab-content active" id="tab0">
+    <div class="section" style="margin-top:16px">
+      <div class="section-label">상황 설명</div>
+      <div class="input-box">
+        <textarea id="situation" maxlength="600" placeholder="예) 친구가 갑자기 돈 빌려달라고 했는데 거절하고 싶어. 기분 안 나쁘게 하고 싶어.
 
-예시)
-- 친구가 갑자기 돈 빌려달라고 했는데 거절하고 싶어
-- 상사가 주말 회식 오라는데 정중하게 거절하고 싶어
-- 오랫동안 연락 못한 친구한테 먼저 연락하고 싶어"></textarea>
-      <div class="char-count"><span id="charCount">0</span>/600</div>
-    </div>
-    <div class="card">
-      <div class="lbl">🎭 답장 톤 선택</div>
-      <div class="tone-grid">
-        <button class="tone-btn" data-tone="polite" onclick="selectTone(this)"><span class="icon">🙏</span>정중하게</button>
-        <button class="tone-btn" data-tone="friendly" onclick="selectTone(this)"><span class="icon">😊</span>친근하게</button>
-        <button class="tone-btn" data-tone="witty" onclick="selectTone(this)"><span class="icon">😎</span>센스있게</button>
+구체적으로 적을수록 더 좋은 답장이 나와요!"></textarea>
+        <div class="char-count"><span id="charCount">0</span> / 600</div>
       </div>
     </div>
-    <div class="gen-wrap">
-      <button class="gen-btn" id="genBtn" onclick="generate()">✨ 답장 생성하기</button>
+
+    <div class="section" style="margin-top:14px">
+      <div class="section-label">답장 톤</div>
+      <div class="tone-grid">
+        <button class="tone-btn" data-tone="polite" onclick="selectTone(this)">
+          <span class="t-em">🙏</span><span class="t-nm">정중하게</span><span class="t-ds">상사, 어른께</span>
+        </button>
+        <button class="tone-btn" data-tone="friendly" onclick="selectTone(this)">
+          <span class="t-em">😊</span><span class="t-nm">친근하게</span><span class="t-ds">친구, 동료에게</span>
+        </button>
+        <button class="tone-btn" data-tone="witty" onclick="selectTone(this)">
+          <span class="t-em">😎</span><span class="t-nm">센스있게</span><span class="t-ds">유머 통하는 사이</span>
+        </button>
+      </div>
+      <button class="gen-btn" id="genBtn" onclick="generate()">답장 생성하기</button>
     </div>
+
     <div class="error-box" id="errorBox"></div>
+
     <div class="loading" id="loading">
       <div class="dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
       <div class="loading-txt" id="loadingTxt">상황을 분석하는 중...</div>
     </div>
-    <div class="results-wrap" id="results"></div>
-    <div class="footer"><a href="/privacy.html">🔒 개인정보처리방침</a></div>
+
+    <div class="divider" id="divider" style="display:none"></div>
+
+    <div class="results-section" id="results"></div>
+
+    <div class="footer-link"><a href="/privacy.html">개인정보처리방침</a></div>
   </div>
 
-  <div class="tab-content" id="tabContent1">
+  <!-- 탭1: 사용 가이드 -->
+  <div class="tab-content" id="tab1">
     <div class="guide-wrap">
-      <div class="guide-section">
-        <div class="guide-section-title">📌 사용 방법</div>
-        <div class="guide-card">
+      <div class="g-section">
+        <div class="g-section-lbl">사용 방법</div>
+        <div class="g-card">
           <ul class="step-list">
-            <li><div class="step-num">1</div><div class="step-content"><strong>상황을 구체적으로 입력해요</strong><p>상대방이 누구인지, 어떤 상황인지, 내가 원하는 결과가 뭔지 적어주세요.</p></div></li>
-            <li><div class="step-num">2</div><div class="step-content"><strong>톤을 선택해요</strong><p>정중하게 / 친근하게 / 센스있게 중 상황에 맞는 톤을 골라요.</p></div></li>
-            <li><div class="step-num">3</div><div class="step-content"><strong>마음에 드는 답장을 골라요</strong><p>복사해서 카카오톡에 바로 붙여넣으면 돼요.</p></div></li>
-            <li><div class="step-num">4</div><div class="step-content"><strong>다듬기로 길이를 조절해요</strong><p>슬라이더로 짧게/보통/길게 조절하고 다듬기를 눌러보세요.</p></div></li>
+            <li><div class="step-num">1</div><div class="step-body"><strong>상황을 구체적으로 입력해요</strong><p>상대방이 누구인지, 어떤 상황인지, 내가 원하는 결과가 뭔지 적어주세요.</p></div></li>
+            <li><div class="step-num">2</div><div class="step-body"><strong>톤을 선택해요</strong><p>정중하게 / 친근하게 / 센스있게 중 상황에 맞는 걸 골라요.</p></div></li>
+            <li><div class="step-num">3</div><div class="step-body"><strong>마음에 드는 답장을 복사해요</strong><p>카카오톡에 바로 붙여넣으면 돼요.</p></div></li>
+            <li><div class="step-num">4</div><div class="step-body"><strong>다듬기로 길이를 조절해요</strong><p>슬라이더로 짧게/보통/길게 조절해보세요.</p></div></li>
           </ul>
         </div>
       </div>
-      <div class="guide-section">
-        <div class="guide-section-title">✍️ 잘 쓰는 팁</div>
-        <div class="guide-card">
-          <div class="guide-card-header"><div class="guide-card-icon">🎯</div><div class="guide-card-title">상황은 구체적으로!</div></div>
+      <div class="g-section">
+        <div class="g-section-lbl">잘 쓰는 팁</div>
+        <div class="g-card">
+          <div class="g-card-hdr"><span class="g-card-icon">🎯</span><span class="g-card-title">상황은 구체적으로!</span></div>
           <p>막연하게 쓰면 막연한 답장이 나와요.</p>
           <div class="compare">
-            <div class="compare-item bad"><div class="compare-label">❌ 이렇게 말고</div><p>친구한테 거절하고 싶어</p></div>
-            <div class="compare-item good"><div class="compare-label">✅ 이렇게!</div><p>10년 지기 친구가 50만원 빌려달라는데 기분 안 나쁘게 거절하고 싶어</p></div>
+            <div class="cmp bad"><div class="cmp-lbl">❌ 이렇게 말고</div><p>친구한테 거절하고 싶어</p></div>
+            <div class="cmp good"><div class="cmp-lbl">✅ 이렇게!</div><p>10년 지기 친구가 50만원 빌려달라는데 기분 안 나쁘게 거절하고 싶어</p></div>
           </div>
         </div>
-        <div class="guide-card">
-          <div class="guide-card-header"><div class="guide-card-icon">🎭</div><div class="guide-card-title">톤은 관계에 맞게!</div></div>
-          <div class="tone-cards">
-            <div class="tone-card"><div class="t-emoji">🙏</div><div class="t-name">정중하게</div><div class="t-desc">상사, 거래처, 어른께</div></div>
-            <div class="tone-card"><div class="t-emoji">😊</div><div class="t-name">친근하게</div><div class="t-desc">친구, 동료, 편한 사이</div></div>
-            <div class="tone-card"><div class="t-emoji">😎</div><div class="t-name">센스있게</div><div class="t-desc">유머 통하는 친구</div></div>
+        <div class="g-card">
+          <div class="g-card-hdr"><span class="g-card-icon">🎭</span><span class="g-card-title">톤은 관계에 맞게!</span></div>
+          <div class="tone-info">
+            <div class="tone-info-item"><div class="tone-info-em">🙏</div><div class="tone-info-nm">정중하게</div><div class="tone-info-ds">상사, 거래처, 어른</div></div>
+            <div class="tone-info-item"><div class="tone-info-em">😊</div><div class="tone-info-nm">친근하게</div><div class="tone-info-ds">친구, 동료</div></div>
+            <div class="tone-info-item"><div class="tone-info-em">😎</div><div class="tone-info-nm">센스있게</div><div class="tone-info-ds">유머 통하는 사이</div></div>
           </div>
         </div>
-        <div class="guide-card">
-          <div class="guide-card-header"><div class="guide-card-icon">✨</div><div class="guide-card-title">다듬기 기능 활용!</div></div>
+        <div class="g-card">
+          <div class="g-card-hdr"><span class="g-card-icon">✨</span><span class="g-card-title">다듬기 기능 활용!</span></div>
           <p>마음에 80%는 드는데 길이가 애매하다면?</p>
-          <div class="tip-box"><div class="tip-label">💡 TIP</div><p>짧게/보통/길게 각각 눌러보면 딱 맞는 길이를 찾을 수 있어요!</p></div>
+          <div class="tip-box"><div class="tip-lbl">TIP</div><p>짧게/보통/길게 각각 눌러보면 딱 맞는 길이를 찾을 수 있어요.</p></div>
         </div>
       </div>
-      <button class="go-btn" onclick="switchTab(0, document.querySelectorAll('.tab')[0])">✨ 지금 바로 써보기</button>
+      <button class="go-btn" onclick="switchTab(0,document.querySelectorAll('.tab')[0])">지금 바로 써보기</button>
     </div>
   </div>
 
-  <div class="tab-content" id="tabContent2">
-    <div class="examples-wrap">
+  <!-- 탭2: 상황별 예시 -->
+  <div class="tab-content" id="tab2">
+    <div class="ex-wrap">
       <div class="ex-section">
-        <div class="ex-section-header"><div class="ex-section-emoji">🙅</div><div class="ex-section-title">거절할 때</div></div>
+        <div class="ex-section-hdr"><div class="ex-em">🙅</div><div class="ex-title">거절할 때</div></div>
         <div class="ex-card">
-          <div class="ex-situation">상황 예시</div>
-          <div class="ex-situation-text">직장 상사가 주말에 회식 오라고 했는데 선약이 있어서 거절하고 싶어.</div>
+          <div class="ex-sit-lbl">상황 예시</div>
+          <div class="ex-sit-txt">직장 상사가 주말에 회식 오라고 했는데 선약이 있어서 거절하고 싶어.</div>
           <div class="ex-replies">
-            <div class="ex-reply polite"><div class="ex-reply-tone">🙏 정중하게</div>팀장님, 죄송한데 이번 주말은 선약이 있어서 참석이 어려울 것 같습니다. 다음 기회엔 꼭 함께하겠습니다!</div>
-            <div class="ex-reply friendly"><div class="ex-reply-tone">😊 친근하게</div>팀장님 주말에 선약이 있어서 이번엔 못 갈 것 같아요 ㅜㅜ 다음엔 꼭 갈게요!</div>
-            <div class="ex-reply witty"><div class="ex-reply-tone">😎 센스있게</div>팀장님 이번 주말은 몸이 이미 다른 데 예약됐어요ㅋㅋ 다음엔 참석각 잡겠습니다!</div>
+            <div class="ex-reply polite"><div class="ex-reply-tone">🙏 정중하게</div><div class="ex-reply-txt">팀장님, 죄송한데 이번 주말은 선약이 있어서 참석이 어려울 것 같습니다. 다음 기회엔 꼭 함께하겠습니다.</div></div>
+            <div class="ex-reply friendly"><div class="ex-reply-tone">😊 친근하게</div><div class="ex-reply-txt">팀장님 주말에 선약이 있어서 이번엔 못 갈 것 같아요 ㅜㅜ 다음엔 꼭 갈게요!</div></div>
+            <div class="ex-reply witty"><div class="ex-reply-tone">😎 센스있게</div><div class="ex-reply-txt">팀장님 이번 주말은 몸이 이미 다른 데 예약됐어요ㅋㅋ 다음엔 참석각 잡겠습니다!</div></div>
           </div>
-          <button class="ex-try-btn" onclick="switchTab(0, document.querySelectorAll('.tab')[0])">✨ 직접 생성해보기</button>
+          <button class="ex-try" onclick="switchTab(0,document.querySelectorAll('.tab')[0])">직접 생성해보기</button>
         </div>
         <div class="ex-card">
-          <div class="ex-situation">상황 예시</div>
-          <div class="ex-situation-text">친한 친구가 갑자기 돈 빌려달라고 했는데 사이 안 나쁘게 거절하고 싶어.</div>
+          <div class="ex-sit-lbl">상황 예시</div>
+          <div class="ex-sit-txt">친한 친구가 갑자기 돈 빌려달라고 했는데 사이 안 나쁘게 거절하고 싶어.</div>
           <div class="ex-replies">
-            <div class="ex-reply polite"><div class="ex-reply-tone">🙏 정중하게</div>나도 요즘 여유가 없어서 도움을 못 줄 것 같아. 진짜 미안해. 다른 방법으로 도울 수 있으면 말해줘.</div>
-            <div class="ex-reply friendly"><div class="ex-reply-tone">😊 친근하게</div>아 미안 나도 요즘 빠듯해서ㅜ 진짜 미안해! 다른 거라면 도울게~</div>
-            <div class="ex-reply witty"><div class="ex-reply-tone">😎 센스있게</div>나도 지금 내 통장이 날 빌려달라고 하는 중이야ㅋㅋ 진짜 미안해ㅜ</div>
+            <div class="ex-reply polite"><div class="ex-reply-tone">🙏 정중하게</div><div class="ex-reply-txt">나도 요즘 여유가 없어서 도움을 못 줄 것 같아. 진짜 미안해.</div></div>
+            <div class="ex-reply friendly"><div class="ex-reply-tone">😊 친근하게</div><div class="ex-reply-txt">아 미안 나도 요즘 빠듯해서ㅜ 진짜 미안해!</div></div>
+            <div class="ex-reply witty"><div class="ex-reply-tone">😎 센스있게</div><div class="ex-reply-txt">나도 지금 내 통장이 날 빌려달라고 하는 중이야ㅋㅋ 진짜 미안해ㅜ</div></div>
           </div>
-          <button class="ex-try-btn" onclick="switchTab(0, document.querySelectorAll('.tab')[0])">✨ 직접 생성해보기</button>
-        </div>
-      </div>
-      <div class="ex-section">
-        <div class="ex-section-header"><div class="ex-section-emoji">🙏</div><div class="ex-section-title">사과할 때</div></div>
-        <div class="ex-card">
-          <div class="ex-situation">상황 예시</div>
-          <div class="ex-situation-text">친구와 약속을 잊어버려서 바람맞혔어. 진심으로 사과하고 싶어.</div>
-          <div class="ex-replies">
-            <div class="ex-reply polite"><div class="ex-reply-tone">🙏 정중하게</div>진짜 미안해. 약속 잊어버린 건 변명의 여지가 없어. 많이 기다렸을 텐데 진심으로 사과해.</div>
-            <div class="ex-reply friendly"><div class="ex-reply-tone">😊 친근하게</div>야 진짜 미안해ㅠㅠ 완전 실수했어. 밥 한번 사도 될까?</div>
-            <div class="ex-reply witty"><div class="ex-reply-tone">😎 센스있게</div>내 뇌가 오늘 파업했나봐ㅠ 진짜 미안해!! 사과의 의미로 내가 쏠게 언제 시간 돼?</div>
-          </div>
-          <button class="ex-try-btn" onclick="switchTab(0, document.querySelectorAll('.tab')[0])">✨ 직접 생성해보기</button>
+          <button class="ex-try" onclick="switchTab(0,document.querySelectorAll('.tab')[0])">직접 생성해보기</button>
         </div>
       </div>
       <div class="ex-section">
-        <div class="ex-section-header"><div class="ex-section-emoji">👋</div><div class="ex-section-title">오랜만에 연락할 때</div></div>
+        <div class="ex-section-hdr"><div class="ex-em">🙏</div><div class="ex-title">사과할 때</div></div>
         <div class="ex-card">
-          <div class="ex-situation">상황 예시</div>
-          <div class="ex-situation-text">1년 넘게 연락 못 했던 친구한테 먼저 연락하고 싶어. 어색하지 않게.</div>
+          <div class="ex-sit-lbl">상황 예시</div>
+          <div class="ex-sit-txt">친구와 약속을 잊어버려서 바람맞혔어. 진심으로 사과하고 싶어.</div>
           <div class="ex-replies">
-            <div class="ex-reply polite"><div class="ex-reply-tone">🙏 정중하게</div>오랜만이야. 갑자기 생각나서 연락해봤어. 잘 지내고 있어?</div>
-            <div class="ex-reply friendly"><div class="ex-reply-tone">😊 친근하게</div>야 살아있어?ㅋㅋ 갑자기 생각나서! 요즘 어떻게 지내?</div>
-            <div class="ex-reply witty"><div class="ex-reply-tone">😎 센스있게</div>나 기억해?ㅋㅋ 갑자기 소환됐어. 요즘 뭐하고 사냐 ㅋㅋ</div>
+            <div class="ex-reply polite"><div class="ex-reply-tone">🙏 정중하게</div><div class="ex-reply-txt">진짜 미안해. 약속 잊어버린 건 변명의 여지가 없어.</div></div>
+            <div class="ex-reply friendly"><div class="ex-reply-tone">😊 친근하게</div><div class="ex-reply-txt">야 진짜 미안해ㅠㅠ 완전 실수했어. 밥 한번 사도 될까?</div></div>
+            <div class="ex-reply witty"><div class="ex-reply-tone">😎 센스있게</div><div class="ex-reply-txt">내 뇌가 오늘 파업했나봐ㅠ 진짜 미안해!! 사과의 의미로 내가 쏠게 언제 시간 돼?</div></div>
           </div>
-          <button class="ex-try-btn" onclick="switchTab(0, document.querySelectorAll('.tab')[0])">✨ 직접 생성해보기</button>
+          <button class="ex-try" onclick="switchTab(0,document.querySelectorAll('.tab')[0])">직접 생성해보기</button>
         </div>
       </div>
       <div class="ex-section">
-        <div class="ex-section-header"><div class="ex-section-emoji">🎉</div><div class="ex-section-title">축하할 때</div></div>
+        <div class="ex-section-hdr"><div class="ex-em">👋</div><div class="ex-title">오랜만에 연락할 때</div></div>
         <div class="ex-card">
-          <div class="ex-situation">상황 예시</div>
-          <div class="ex-situation-text">친구가 취업 합격 소식을 전해줬어. 진심으로 축하해주고 싶어.</div>
+          <div class="ex-sit-lbl">상황 예시</div>
+          <div class="ex-sit-txt">1년 넘게 연락 못 했던 친구한테 먼저 연락하고 싶어. 어색하지 않게.</div>
           <div class="ex-replies">
-            <div class="ex-reply polite"><div class="ex-reply-tone">🙏 정중하게</div>진짜 축하해! 그동안 열심히 준비한 게 드디어 결실을 맺었구나. 앞으로도 잘 될 거야!</div>
-            <div class="ex-reply friendly"><div class="ex-reply-tone">😊 친근하게</div>오 대박!! 진짜 축하해🎉 고생한 만큼 좋은 결과 나왔다!! 한턱 쏴!!ㅋㅋ</div>
-            <div class="ex-reply witty"><div class="ex-reply-tone">😎 센스있게</div>이제 내 주변에 직장인 하나 생겼다ㅋㅋ 진짜 축하해!! 첫 월급날 기다릴게😎</div>
+            <div class="ex-reply polite"><div class="ex-reply-tone">🙏 정중하게</div><div class="ex-reply-txt">오랜만이야. 갑자기 생각나서 연락해봤어. 잘 지내고 있어?</div></div>
+            <div class="ex-reply friendly"><div class="ex-reply-tone">😊 친근하게</div><div class="ex-reply-txt">야 살아있어?ㅋㅋ 갑자기 생각나서! 요즘 어떻게 지내?</div></div>
+            <div class="ex-reply witty"><div class="ex-reply-tone">😎 센스있게</div><div class="ex-reply-txt">나 기억해?ㅋㅋ 갑자기 소환됐어. 요즘 뭐하고 사냐 ㅋㅋ</div></div>
           </div>
-          <button class="ex-try-btn" onclick="switchTab(0, document.querySelectorAll('.tab')[0])">✨ 직접 생성해보기</button>
+          <button class="ex-try" onclick="switchTab(0,document.querySelectorAll('.tab')[0])">직접 생성해보기</button>
+        </div>
+      </div>
+      <div class="ex-section">
+        <div class="ex-section-hdr"><div class="ex-em">🎉</div><div class="ex-title">축하할 때</div></div>
+        <div class="ex-card">
+          <div class="ex-sit-lbl">상황 예시</div>
+          <div class="ex-sit-txt">친구가 취업 합격 소식을 전해줬어. 진심으로 축하해주고 싶어.</div>
+          <div class="ex-replies">
+            <div class="ex-reply polite"><div class="ex-reply-tone">🙏 정중하게</div><div class="ex-reply-txt">진짜 축하해! 그동안 열심히 준비한 게 드디어 결실을 맺었구나.</div></div>
+            <div class="ex-reply friendly"><div class="ex-reply-tone">😊 친근하게</div><div class="ex-reply-txt">오 대박!! 진짜 축하해 고생한 만큼 좋은 결과 나왔다!! 한턱 쏴!!ㅋㅋ</div></div>
+            <div class="ex-reply witty"><div class="ex-reply-tone">😎 센스있게</div><div class="ex-reply-txt">이제 내 주변에 직장인 하나 생겼다ㅋㅋ 진짜 축하해!! 첫 월급날 기다릴게</div></div>
+          </div>
+          <button class="ex-try" onclick="switchTab(0,document.querySelectorAll('.tab')[0])">직접 생성해보기</button>
         </div>
       </div>
     </div>
@@ -298,14 +356,14 @@ let selectedTone = '';
 let storedReplies = [];
 let loadingTimer = null;
 let loadingMsgIdx = 0;
-const loadingMsgs = ['상황을 분석하는 중...','관계와 맥락을 파악하는 중...','딱 맞는 표현을 고르는 중...','마지막으로 다듬는 중... ✨'];
+const loadingMsgs = ['상황을 분석하는 중...','관계와 맥락을 파악하는 중...','딱 맞는 표현을 고르는 중...','마지막으로 다듬는 중...'];
 const lengthLabels = {1:'짧게', 2:'보통', 3:'길게'};
 
 function switchTab(n, el) {
-  document.querySelectorAll('.tab-content').forEach((c, i) => c.classList.toggle('active', i === n));
+  document.querySelectorAll('.tab-content').forEach((c,i) => c.classList.toggle('active', i===n));
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
   el.classList.add('active');
-  window.scrollTo({ top: 0, behavior: 'smooth' });
+  window.scrollTo({top:0, behavior:'smooth'});
 }
 
 document.getElementById('situation').addEventListener('input', function() {
@@ -316,6 +374,7 @@ function selectTone(btn) {
   document.querySelectorAll('.tone-btn').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
   selectedTone = btn.dataset.tone;
+  hideError();
 }
 
 function setLoading(on) {
@@ -326,7 +385,7 @@ function setLoading(on) {
     loadingMsgIdx = 0;
     document.getElementById('loadingTxt').textContent = loadingMsgs[0];
     loadingTimer = setInterval(() => {
-      loadingMsgIdx = (loadingMsgIdx + 1) % loadingMsgs.length;
+      loadingMsgIdx = (loadingMsgIdx+1) % loadingMsgs.length;
       document.getElementById('loadingTxt').textContent = loadingMsgs[loadingMsgIdx];
     }, 1400);
   } else {
@@ -336,8 +395,7 @@ function setLoading(on) {
 
 function showError(msg) {
   const el = document.getElementById('errorBox');
-  el.innerHTML = msg; el.classList.add('show');
-  setTimeout(() => el.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 50);
+  el.textContent = msg; el.classList.add('show');
 }
 function hideError() { document.getElementById('errorBox').classList.remove('show'); }
 function esc(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
@@ -350,8 +408,8 @@ async function copyText(btn, text) {
     document.body.appendChild(ta); ta.focus(); ta.select();
     document.execCommand('copy'); document.body.removeChild(ta);
   }
-  btn.classList.add('copied'); btn.textContent = '✅ 복사됐어요!';
-  setTimeout(() => { btn.classList.remove('copied'); btn.textContent = '📋 복사하기'; }, 2000);
+  btn.classList.add('copied'); btn.textContent = '복사됐어요!';
+  setTimeout(() => { btn.classList.remove('copied'); btn.textContent = '복사하기'; }, 2000);
 }
 
 async function shareLink(btn) {
@@ -363,13 +421,13 @@ async function shareLink(btn) {
     document.body.appendChild(ta); ta.focus(); ta.select();
     document.execCommand('copy'); document.body.removeChild(ta);
   }
-  btn.classList.add('copied'); btn.textContent = '✅ 링크 복사됐어요!';
-  setTimeout(() => { btn.classList.remove('copied'); btn.textContent = '🔗 친구한테 공유하기'; }, 2500);
+  btn.classList.add('copied'); btn.textContent = '링크 복사됐어요!';
+  setTimeout(() => { btn.classList.remove('copied'); btn.innerHTML = '<div class="share-dot"></div>친구한테 공유하기'; }, 2500);
 }
 
-function updateLengthLabel(idx) {
+function updateSliderVal(idx) {
   const val = parseInt(document.getElementById('slider'+idx).value);
-  document.getElementById('lenLabel'+idx).textContent = lengthLabels[val];
+  document.getElementById('sliderVal'+idx).textContent = lengthLabels[val];
 }
 
 async function refine(idx) {
@@ -380,8 +438,7 @@ async function refine(idx) {
   const original = storedReplies[idx];
   const existing = card.querySelector('.refined-box');
   if (existing) existing.remove();
-  btn.disabled = true;
-  btn.textContent = '✍️ 다듬는 중...';
+  btn.disabled = true; btn.textContent = '다듬는 중...';
   try {
     const res = await fetch('/.netlify/functions/generate', {
       method: 'POST',
@@ -394,50 +451,51 @@ async function refine(idx) {
     const box = document.createElement('div');
     box.className = 'refined-box';
     box.innerHTML = `
-      <div class="refined-label">✨ 다듬어진 답장 · ${lengthName}</div>
-      <div class="refined-text">${esc(refined)}</div>
+      <div class="refined-lbl">다듬어진 답장 · ${lengthName}</div>
+      <div class="refined-txt">${esc(refined)}</div>
       <div class="refined-footer">
-        <button class="copy-btn" onclick="copyText(this, ${JSON.stringify(refined)})">📋 복사하기</button>
+        <button class="btn-copy" onclick="copyText(this, ${JSON.stringify(refined)})">복사하기</button>
       </div>
     `;
     card.appendChild(box);
-  } catch(e) {
-    showError('⚠️ ' + (e.message || '다듬기 실패했어요.'));
-  }
-  btn.disabled = false;
-  btn.textContent = '✍️ 다시 다듬기';
+  } catch(e) { showError(e.message || '다듬기 실패했어요.'); }
+  btn.disabled = false; btn.textContent = '다시 다듬기';
 }
 
 function renderResults(replies) {
   storedReplies = replies;
-  const toneLabel = { polite: '정중하게', friendly: '친근하게', witty: '센스있게' }[selectedTone];
+  const toneLabel = {polite:'정중하게', friendly:'친근하게', witty:'센스있게'}[selectedTone];
   const wrap = document.getElementById('results');
   wrap.innerHTML = `
     <div class="results-header">
       <div class="results-title">생성된 답장 · ${toneLabel}</div>
-      <div class="results-badge">총 3개</div>
+      <div class="results-cnt">3개</div>
     </div>
     ${replies.map((text, i) => `
       <div class="reply-card" id="replyCard${i}">
-        <div class="reply-num">REPLY ${i + 1}</div>
-        <div class="reply-text">${esc(text)}</div>
-        <div class="refine-area">
-          <div class="length-labels"><span>짧게</span><span>보통</span><span>길게</span></div>
-          <div class="slider-row">
-            <input type="range" min="1" max="3" step="1" value="2" id="slider${i}" oninput="updateLengthLabel(${i})">
-            <span class="length-val" id="lenLabel${i}">보통</span>
-          </div>
-          <div class="reply-footer">
-            <button class="refine-btn" id="refineBtn${i}" onclick="refine(${i})">✍️ 다듬기</button>
-            <button class="copy-btn" onclick="copyText(this, ${JSON.stringify(text)})">📋 복사하기</button>
-          </div>
+        <div class="reply-idx">REPLY ${i+1}</div>
+        <div class="reply-txt">${esc(text)}</div>
+        <div class="reply-divider"></div>
+        <div class="slider-labels"><span>짧게</span><span>보통</span><span>길게</span></div>
+        <div class="slider-row">
+          <input type="range" min="1" max="3" step="1" value="2" id="slider${i}" oninput="updateSliderVal(${i})">
+          <span class="slider-val" id="sliderVal${i}">보통</span>
+        </div>
+        <div class="reply-btns">
+          <button class="btn-refine" id="refineBtn${i}" onclick="refine(${i})">다듬기</button>
+          <button class="btn-copy" onclick="copyText(this, ${JSON.stringify(text)})">복사하기</button>
         </div>
       </div>
     `).join('')}
-    <button class="share-btn" onclick="shareLink(this)">🔗 친구한테 공유하기</button>
+    <div class="share-row">
+      <button class="share-btn" onclick="shareLink(this)">
+        <div class="share-dot"></div>친구한테 공유하기
+      </button>
+    </div>
   `;
   wrap.classList.add('show');
-  setTimeout(() => wrap.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
+  document.getElementById('divider').style.display = 'block';
+  setTimeout(() => wrap.scrollIntoView({behavior:'smooth', block:'start'}), 100);
 }
 
 async function generate() {
@@ -446,33 +504,34 @@ async function generate() {
       b.classList.add('shake');
       setTimeout(() => b.classList.remove('shake'), 500);
     });
-    showError('⚠️ 답장 톤을 먼저 선택해주세요!');
+    showError('답장 톤을 먼저 선택해주세요.');
     return;
   }
   const situation = document.getElementById('situation').value.trim();
   if (!situation) {
     const ta = document.getElementById('situation');
-    ta.classList.add('shake'); ta.focus();
-    setTimeout(() => ta.classList.remove('shake'), 500);
+    ta.focus();
+    showError('상황을 먼저 입력해주세요.');
     return;
   }
   hideError();
   document.getElementById('results').classList.remove('show');
   document.getElementById('results').innerHTML = '';
+  document.getElementById('divider').style.display = 'none';
   setLoading(true);
   try {
     const res = await fetch('/.netlify/functions/generate', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ situation, tone: selectedTone })
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({situation, tone: selectedTone})
     });
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || '오류가 발생했어요.');
     setLoading(false);
     renderResults(data.replies);
-  } catch (e) {
+  } catch(e) {
     setLoading(false);
-    showError('⚠️ ' + (e.message || '오류가 발생했어요. 다시 시도해주세요.'));
+    showError(e.message || '오류가 발생했어요. 다시 시도해주세요.');
   }
 }
 </script>
